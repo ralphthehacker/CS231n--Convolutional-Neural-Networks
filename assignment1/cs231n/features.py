@@ -7,7 +7,7 @@ def extract_features(imgs, feature_fns, verbose=False):
   """
   Given pixel data for images and several feature functions that can operate on
   single images, apply all feature functions to all images, concatenating the
-  feature vectors for each image and storing the features for all images in
+  feature vectors for each image and storing the features.ipynb for all images in
   a single matrix.
 
   Inputs:
@@ -19,7 +19,7 @@ def extract_features(imgs, feature_fns, verbose=False):
 
   Returns:
   An array of shape (N, F_1 + ... + F_k) where each column is the concatenation
-  of all features for a single image.
+  of all features.ipynb for a single image.
   """
   num_images = imgs.shape[0]
   if num_images == 0:
@@ -34,13 +34,13 @@ def extract_features(imgs, feature_fns, verbose=False):
     feature_dims.append(feats.size)
     first_image_features.append(feats)
 
-  # Now that we know the dimensions of the features, we can allocate a single
-  # big array to store all features as columns.
+  # Now that we know the dimensions of the features.ipynb, we can allocate a single
+  # big array to store all features.ipynb as columns.
   total_feature_dim = sum(feature_dims)
   imgs_features = np.zeros((num_images, total_feature_dim))
   imgs_features[0] = np.hstack(first_image_features).T
 
-  # Extract features for the rest of the images.
+  # Extract features.ipynb for the rest of the images.
   for i in xrange(1, num_images):
     idx = 0
     for feature_fn, feature_dim in zip(feature_fns, feature_dims):
@@ -48,7 +48,7 @@ def extract_features(imgs, feature_fns, verbose=False):
       imgs_features[i, idx:next_idx] = feature_fn(imgs[i].squeeze())
       idx = next_idx
     if verbose and i % 1000 == 0:
-      print 'Done extracting features for %d / %d images' % (i, num_images)
+      print 'Done extracting features.ipynb for %d / %d images' % (i, num_images)
 
   return imgs_features
 

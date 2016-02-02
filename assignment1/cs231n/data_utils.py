@@ -18,7 +18,9 @@ def load_CIFAR10(ROOT):
   xs = []
   ys = []
   for b in range(1,6):
+    print(os.path)
     f = os.path.join(ROOT, 'data_batch_%d' % (b, ))
+    print(f)
     X, Y = load_CIFAR_batch(f)
     xs.append(X)
     ys.append(Y)    
@@ -156,3 +158,4 @@ def load_models(models_dir):
       except pickle.UnpicklingError:
         continue
   return models
+

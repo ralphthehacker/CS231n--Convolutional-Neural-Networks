@@ -1,2 +1,5 @@
-from cs231n.classifiers.k_nearest_neighbor import *
-from cs231n.classifiers.linear_classifier import *
+from k_nearest_neighbor import *
+from linear_classifier import *
+from linear_svm import *
+from neural_net import *
+from softmax import *
