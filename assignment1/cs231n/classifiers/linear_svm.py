@@ -78,34 +78,59 @@ def svm_loss_vectorized(W, X, y, reg):
 
   Inputs and outputs are the same as svm_loss_naive.
   """
+
     loss = 0.0
     dW = np.zeros(W.shape)  # initialize the gradient as zero
-
+    # Setting up
     dimension = X.shape[1]
-    print(dimension)
-    train_images = W.shape[0]
-    print train_images
+    train_images = X.shape[0]
     classifier_classes = W.shape[1]
-    print classifier_classes
-    scores = X.dot(W)
-    print y.shape
-    print scores.shape
+    print "Number of train images",train_images
+    print "Number of classifier classes: ", classifier_classes
+    all_scores = X.dot(W)
+
+    # Those are the debugging statements that helped me solve this problem
+    # print("Dimension: ",dimension)
+    # print("X's shape"), X.shape
+    #print "Shape of the scores", all_scores.shape
+    #print "Y's shape",y.shape
+
 
     #############################################################################
     # TODO:                                                                     #
     # Implement a vectorized version of the structured SVM loss, storing the    #
     # result in loss.                                                           #
     #############################################################################
-    svm_train_scores = scores[y]
-    margin = scores - svm_train_scores + 1
-    margin[y] = 0 # Subtracting the correct class examples
+
+    # Determine all the scores for Score(correc_label) for all the 500 images
+
+    # Correct scores should be a 500x1 vector, where each entry corresponds to one image' correct score
+    correct_label_scores = all_scores[np.arange(train_images),y]
+
+    #DEBUG
+    # print "Correct scores shape, should be a 500x1 vector, where each entry corresponds to one image' correct score " \
+    #       "scores", correct_label_scores.shape
+    # print "Before subtracting", np.transpose(all_scores)
+
+    # Subtracting the correct scores from all classifiers' scores
+    margin = np.transpose(all_scores) - correct_label_scores + 1
+    margin[y,np.arange(train_images)] = 0 # Subtracting the correct class examples
+
+    #DEBUG
+    # print "After", margin
+    # margin = np.transpose(margin)
+    # print "The margin's shape", margin.shape
+    # print ""
+    # print "The margin itself", margin
 
     #Computing the maximum
-    print type(margin)
-    print margin
-    max_val = np.max(np.zeros((margin.shape)),margin )
-    loss = np.sum(max_val)
+    zero_matrix = np.zeros((margin.shape))
+    max_values = np.maximum(zero_matrix,margin )
+
+    # Now, compute the loss for all examples
+    loss = np.sum(max_values)
     loss /= train_images
+    # And regularize everything :D
     loss += 0.5*reg*np.sum(W*W)
 
     #############################################################################
@@ -122,20 +147,25 @@ def svm_loss_vectorized(W, X, y, reg):
     # to reuse some of the intermediate values that you used to compute the     #
     # loss.                                                                     #
     #############################################################################
-    binary = max_val
-    binary[max_val > 0] = 1
-    col_sum = np.sum(binary, axis=0)
-    binary[y, range(train_images)] = -col_sum[range(train_images)]
-    dW = np.dot(binary, X.T)
+    # Determine which classifiers have a loss > 0
+    non_zero_classifiers = max_values
+    non_zero_classifiers[max_values > 0] = 1
+    # Calculating indexes for the necessary subtractions
+    images_sum = np.sum(non_zero_classifiers, axis=0)
+    # Subtracting the derivative
+    non_zero_classifiers[y, range(train_images)] = -images_sum[range(train_images)]
+    # And updating the gradients
+    dW = np.transpose(np.dot(non_zero_classifiers, X))
 
-    # Divide
+    # Normalizer, normalizer, oh! He's a normalizer baby!
     dW /= train_images
 
-    # Regularize
+    # Finally, regularize
     dW += reg*W
 
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
 
+    # Yaaaaay!
     return loss, dW
