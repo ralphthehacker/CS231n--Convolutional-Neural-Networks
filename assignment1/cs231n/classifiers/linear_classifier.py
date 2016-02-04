@@ -2,7 +2,6 @@ import numpy as np
 from linear_svm import *
 from softmax import *
 
-from classifiers import svm_loss_vectorized, softmax_loss_vectorized
 
 
 class LinearClassifier(object):
@@ -27,7 +26,7 @@ class LinearClassifier(object):
     Outputs:
     A list containing the value of the loss function at each training iteration.
     """
-        print X
+
         num_train, dim = X.shape
         num_classes = np.max(y) + 1  # assume y takes values 0...K-1 where K is number of classes
         if self.W is None:
@@ -50,12 +49,17 @@ class LinearClassifier(object):
             # Hint: Use np.random.choice to generate indices. Sampling with         #
             # replacement is faster than sampling without replacement.              #
             #########################################################################
-            # Get a sample from X
-            X_batch = np.random.choice(X)
-            # And then get the corresponding labels
-            y_batch = y[X_batch[0]]
+            # Get a sample from X by first generating random indices
+            X_batch_indices = np.random.choice(num_train,size = batch_size,replace=True)
+            # Then index X to get the desired images
+            X_batch = X[X_batch_indices,:] # Should be (dim, batch size)
 
-            
+
+            # And then get the corresponding labels
+            y_batch = y[X_batch_indices] # should be (batch size, )
+
+
+
             #########################################################################
             #                       END OF YOUR CODE                                #
             #########################################################################
@@ -69,7 +73,11 @@ class LinearClassifier(object):
             # TODO:                                                                 #
             # Update the weights using the gradient and the learning rate.          #
             #########################################################################
-            pass
+
+            # Vanilla gradient descent. Just multiply the learning rate by the gradient
+            update = - learning_rate*grad
+            new = self.W+update
+            self.W = new
             #########################################################################
             #                       END OF YOUR CODE                                #
             #########################################################################
@@ -85,19 +93,33 @@ class LinearClassifier(object):
     data points.
 
     Inputs:
-    - X: D x N array of training data. Each column is a D-dimensional point.
+    - X: N x D array of training data. Each column is a D-dimensional point.
 
     Returns:
     - y_pred: Predicted labels for the data in X. y_pred is a 1-dimensional
       array of length N, and each element is an integer giving the predicted
       class.
     """
-        y_pred = np.zeros(X.shape[1])
+        y_pred = np.zeros(X.shape[0])
+        training_examples = X.shape[0]
+
         ###########################################################################
         # TODO:                                                                   #
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
-        pass
+
+        # First, you need to calculate the labels for every training example
+        results = np.dot(X,self.W)# This is done by multiplying the weights with the images
+        # print "results' shape",results.shape
+        best_labels = results.argmax(axis=1)
+
+        # print results[[x for x in range(10)],:]
+        # print best_labels[0:10]
+        #
+        # a
+        # Now, the label selected should be the classifier with the highest score
+        y_pred = best_labels
+
         ###########################################################################
         #                           END OF YOUR CODE                              #
         ###########################################################################
@@ -118,7 +140,6 @@ class LinearClassifier(object):
     - loss as a single float
     - gradient with respect to self.W; an array of the same shape as W
     """
-        print(X_batch)
         pass
 
 
@@ -126,8 +147,6 @@ class LinearSVM(LinearClassifier):
     """ A subclass that uses the Multiclass SVM loss function """
 
     def loss(self, X_batch, y_batch, reg):
-        print X_batch
-        print y_batch
         return svm_loss_vectorized(self.W, X_batch, y_batch, reg)
 
 
