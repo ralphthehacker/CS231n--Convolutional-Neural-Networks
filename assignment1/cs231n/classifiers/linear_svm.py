@@ -85,8 +85,8 @@ def svm_loss_vectorized(W, X, y, reg):
     dimension = X.shape[1]
     train_images = X.shape[0]
     classifier_classes = W.shape[1]
-    print "Number of train images",train_images
-    print "Number of classifier classes: ", classifier_classes
+    # print "Number of train images",train_images
+    # print "Number of classifier classes: ", classifier_classes
     all_scores = X.dot(W)
 
     # Those are the debugging statements that helped me solve this problem
