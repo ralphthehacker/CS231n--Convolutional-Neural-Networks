@@ -1,4 +1,5 @@
 import numpy as np
+import softmax
 import matplotlib.pyplot as plt
 
 
@@ -65,7 +66,7 @@ class TwoLayerNet(object):
     # Unpack variables from the params dictionary
     W1, b1 = self.params['W1'], self.params['b1']
     W2, b2 = self.params['W2'], self.params['b2']
-    N, D = X.shape
+    num_train, dimensions = X.shape
 
     # Compute the forward pass
     scores = None
@@ -74,7 +75,22 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    pass
+    # First, add up the inputs to the first layer's weights
+    layer_result = np.dot(X,W1)
+    #And add up the bias
+    layer_result += b1
+
+    #Do the same thing for the hidden layer
+    sec_layer_result = np.dot(layer_result,W2)
+    sec_layer_result += b2
+
+
+    # Store the scores in a variable
+    scores = sec_layer_result
+
+
+
+
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -92,6 +108,11 @@ class TwoLayerNet(object):
     # classifier loss. So that your results match ours, multiply the            #
     # regularization loss by 0.5                                                #
     #############################################################################
+
+    
+
+
+
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
