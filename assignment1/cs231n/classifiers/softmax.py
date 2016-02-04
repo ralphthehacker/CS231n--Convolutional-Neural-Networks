@@ -100,9 +100,6 @@ def softmax_loss_vectorized(W, X, y, reg):
 
   Inputs and outputs are the same as softmax_loss_naive.
   """
-    # Initialize the loss and gradient to zero.
-    loss = 0.0
-    dW = np.zeros_like(W)
 
     #############################################################################
     # TODO: Compute the softmax.ipynb loss and its gradient using no explicit loops.  #
@@ -110,7 +107,48 @@ def softmax_loss_vectorized(W, X, y, reg):
     # here, it is easy to run into numeric instability. Don't forget the        #
     # regularization!                                                           #
     #############################################################################
-    pass
+
+    # Initialize the loss and gradient to zero.
+    loss = 0.0
+    dW = np.zeros_like(W)
+    train_images = X.shape[0]
+    # Store all the scores in a matrix
+    all_scores = np.dot(X,W)
+    #First, calculate the normalizing constant for numeric stability
+    constant = np.max(all_scores,axis=1)
+    normalized_scores = np.transpose(np.subtract(np.transpose(all_scores),constant))
+
+    #Then, calculate softmax for the correct scores
+    exp_scores = np.exp(all_scores)
+    # First, keep track of the sum of values per row
+    exp_sum = np.sum(exp_scores,axis=1)
+
+    # Finally, calculate the softmax score for every entry
+    softmax_scores = np.transpose(exp_scores)/exp_sum # useful when computing gradient
+    softmax_scores = np.transpose(softmax_scores)
+    # And then, compute the loss
+    loss_score = softmax_scores[range(train_images),y]
+    loss_score = -1 * np.log(loss_score) #taking the logarithm
+    loss += np.sum(loss_score)
+
+    #Normalize and regularize the loss
+    loss /= train_images
+    loss += 0.5*reg*np.sum(W*W)
+
+    #Finally, calculate a vectorized gradient
+
+    # Calculate the derivative at the correct label
+    softmax_scores[range(train_images),y] -= 1
+    # Then, make a matrix containing all the gradient values
+    gradient_values = np.dot(np.transpose(X),softmax_scores)
+    gradient_values = gradient_values
+
+    #FINALLY, update the gradient
+    dW+= gradient_values
+    #And normalize and regularize it
+    dW /= train_images
+    dW += reg*W
+
     #############################################################################
     #                          END OF YOUR CODE                                 #
     #############################################################################
