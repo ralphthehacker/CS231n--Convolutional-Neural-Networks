@@ -42,6 +42,7 @@ class TwoLayerNet(object):
         self.params['W2'] = std * np.random.randn(hidden_size, output_size)
         self.params['b2'] = np.zeros(output_size)
 
+
     def loss(self, X, y=None, reg=0.0):
         # Unpack variables from the params dictionary
         W1, b1 = self.params['W1'], self.params['b1']
@@ -153,12 +154,6 @@ class TwoLayerNet(object):
         w1_gradient += reg*W1
         w2_gradient += reg*W2
 
-        # print "W1 gradient", w1_gradient
-        # print "W2 gradient", w2_gradient
-        # print "b1 gradient", b1_gradient
-        # print "b2 gradient", b2_gradient
-
-
         # And store them
         grads['W1'] = w1_gradient
         grads['W2'] = w2_gradient
@@ -234,7 +229,25 @@ class TwoLayerNet(object):
             # using stochastic gradient descent. You'll need to use the gradients   #
             # stored in the grads dictionary defined above.                         #
             #########################################################################
-            pass
+            # Update W1
+            update_w1 =  - learning_rate * grads['W1']
+            new_w1 = self.params['W1']+update_w1
+            self.params['W1'] = new_w1
+            # Update b1
+            update_b1 =  - learning_rate * grads['b1']
+            new_b1 = self.params['b1']+update_b1
+            self.params['b1'] = new_b1
+            # Update W2
+            update_w2 =  - learning_rate * grads['W2']
+            new_w2 = self.params['W2']+update_w2
+            self.params['W2'] = new_w2
+            # Update b2
+            update_b2 =  - learning_rate * grads['b2']
+            new_b2 = self.params['b2']+update_b2
+            self.params['b2'] = new_b2
+
+
+
             #########################################################################
             #                             END OF YOUR CODE                          #
             #########################################################################
@@ -279,7 +292,17 @@ class TwoLayerNet(object):
         ###########################################################################
         # TODO: Implement this function; it should be VERY simple!                #
         ###########################################################################
-        pass
+
+        layer1 = np.dot(X, self.params['W1'])
+        layer1 += self.params['b1']
+        relu_layer = relu(layer1)
+        scores = np.dot(relu_layer, self.params['W2']) + self.params['b2']
+
+        # Get the most likely label:
+        classified_label = np.argmax(scores,axis=1)
+        y_pred = classified_label
+
+
         ###########################################################################
         #                              END OF YOUR CODE                           #
         ###########################################################################
