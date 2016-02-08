@@ -2,8 +2,10 @@ import numpy as np
 import softmax
 import matplotlib.pyplot as plt
 
-
+relu = lambda x: x * (x > 0)
 class TwoLayerNet(object):
+
+
     """
   A two-layer fully-connected neural network. The net has an input dimension of
   N, a hidden layer dimension of H, and performs classification over C classes.
@@ -41,28 +43,6 @@ class TwoLayerNet(object):
         self.params['b2'] = np.zeros(output_size)
 
     def loss(self, X, y=None, reg=0.0):
-        """
-    Compute the loss and gradients for a two layer fully connected neural
-    network.
-
-    Inputs:
-    - X: Input data of shape (N, D). Each X[i] is a training sample.
-    - y: Vector of training labels. y[i] is the label for X[i], and each y[i] is
-      an integer in the range 0 <= y[i] < C. This parameter is optional; if it
-      is not passed then we only return scores, and if it is passed then we
-      instead return the loss and gradients.
-    - reg: Regularization strength.
-
-    Returns:
-    If y is None, return a matrix scores of shape (N, C) where scores[i, c] is
-    the score for class c on input X[i].
-
-    If y is not None, instead return a tuple of:
-    - loss: Loss (data loss and regularization loss) for this batch of training
-      samples.
-    - grads: Dictionary mapping parameter names to gradients of those parameters
-      with respect to the loss function; has the same keys as self.params.
-    """
         # Unpack variables from the params dictionary
         W1, b1 = self.params['W1'], self.params['b1']
         W2, b2 = self.params['W2'], self.params['b2']
@@ -78,17 +58,21 @@ class TwoLayerNet(object):
         # First, add up the inputs to the first layer's weights
         layer_result = np.dot(X, W1)
         layer_result += b1
+        first_layer = layer_result[:]
+
 
         # Use the RELU activation
         relu_mask = layer_result < 0
-        layer_result[relu_mask] = 0
+        relu_layer =  relu(layer_result)
 
         # Do the same thing for the second layer
-        sec_layer_result = np.dot(layer_result, W2)
+        sec_layer_result = np.dot(relu_layer, W2)
         sec_layer_result += b2
 
         # Store the scores in a variable
         scores = sec_layer_result
+
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -112,13 +96,10 @@ class TwoLayerNet(object):
         softmax_exp = np.sum(np.exp(scores),axis=1)
         softmax_scores = np.sum(-scores[range(num_train),y] + np.log(softmax_exp))/num_train
         loss = softmax_scores
-        print "The data loss is: ", loss
         # Doing the regularization for W1
         loss += 0.5*reg*np.sum(W1*W1)
         # Doing the regularization for W2
         loss += 0.5*reg*np.sum(W2*W2)
-        print "The total loss is: ", loss
-
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -132,11 +113,67 @@ class TwoLayerNet(object):
         # grads['W1'] should store the gradient on W1, and be a matrix of same size #
         #############################################################################
 
+        # Start at the softmax layer and compute the derivative for it
+        #initial_gradient
+        dlayer4 = 1.0
+
+
+        # The gradient of the logarithm
+        dlayer3 = (np.exp(sec_layer_result).T/softmax_exp).T
+
+
+        # The gradient of -scores[range(num_train),y], the correct labels
+        y_gradients = np.zeros(dlayer3.shape)
+        y_gradients[range(num_train),y] = 1
+        # Updating the gradient
+        dlayer3 -= y_gradients
+        dlayer3 /= num_train
+        # Using the chain rule
+        dlayer3 *= dlayer4
+
+
+
+        # Calculating the gradient for the second layer
+        dlayer2 =  np.dot(dlayer3,np.transpose(W2))
+
+
+        # Then, the gradient for RELU
+        dlayer1  = dlayer2*(first_layer>0)
+
+        # Calculating the gradient for the other elements
+        w1_gradient = np.dot(np.transpose(X),dlayer1)
+        w2_gradient = np.dot(np.transpose(relu_layer),dlayer3)
+        # print "MINE"
+        # print w2_gradient
+        # return w2_gradient
+        b1_gradient = np.sum(dlayer1,axis=0)
+        b2_gradient = np.sum(dlayer3,axis=0)
+
+        # Finally, regularize the gradients
+        w1_gradient += reg*W1
+        w2_gradient += reg*W2
+
+        # print "W1 gradient", w1_gradient
+        # print "W2 gradient", w2_gradient
+        # print "b1 gradient", b1_gradient
+        # print "b2 gradient", b2_gradient
+
+
+        # And store them
+        grads['W1'] = w1_gradient
+        grads['W2'] = w2_gradient
+        grads['b1'] = b1_gradient
+        grads['b2'] = b2_gradient
+
+
+
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
 
         return loss, grads
+
 
     def train(self, X, y, X_val, y_val,
               learning_rate=1e-3, learning_rate_decay=0.95,
@@ -175,6 +212,13 @@ class TwoLayerNet(object):
             # TODO: Create a random minibatch of training data and labels, storing  #
             # them in X_batch and y_batch respectively.                             #
             #########################################################################
+
+            # Creating X_batch
+            X_batch_indices = np.random.choice(num_train,size = batch_size,replace=True)
+            X_batch = X[X_batch_indices,:] # Should be (dim, batch size)
+
+            #Creating Y_batch
+            y_batch = y[X_batch_indices] # should be (batch size, )
             pass
             #########################################################################
             #                             END OF YOUR CODE                          #
