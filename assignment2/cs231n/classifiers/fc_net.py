@@ -389,17 +389,13 @@ class FullyConnectedNet(object):
 
         #Calculating the loss
         loss,softmax_dx= softmax_loss(scores,y)
-        # print "Softmax's dx", softmax_dx.shape
-        # print "The x's shape", first_cache[0].shape
-        # print "The weights' shape", first_cache[1].shape
 
-
-        #TODO: HOW CAN I USE DB AND DW?
+        # Backpropagating the result of the very last affine layer of this model
         incoming_dx,incoming_dw,incoming_db = affine_backward(dout= softmax_dx,cache = first_cache)
 
         # Update the grads of the last layer
-        grads["W"+str(self.num_layers)] = self.reg*incoming_dw
-        grads["W"+str(self.num_layers)] = incoming_db
+        grads["W"+str(self.num_layers)] = incoming_dw
+        grads["b"+str(self.num_layers)] = incoming_db
 
         # Now, do the backward pass :P
         for layer in reversed(range(1,self.num_layers)):
@@ -413,21 +409,7 @@ class FullyConnectedNet(object):
                 relu_input = incoming_dx
 
             # Backpropagating into the relu layer
-            # print "Testing the cache"
-            # print "layer is",layer
-            # for key in caches.keys():
-            #     print key
-
-
-            # print "Shape of the relu input", incoming_dx.shape
-            # print "Shape of the relu cache", caches[layer]["relu"].shape
-
-
-
             relu_out = relu_backward(dout=relu_input,cache = caches[layer]["relu"])
-            # print "shape of the relu output", relu_out
-            # print ""
-            # print "*********"
 
             # If the net uses batch normalization
             affine_input = None
@@ -442,12 +424,13 @@ class FullyConnectedNet(object):
             dx,dw,db = affine_backward(dout=affine_input,cache = caches[layer]['affine'])
 
             #Now, regularize the weights for the fully connected layer
-            dw += self.reg*dw
+            forward_weights = caches[layer]["affine"][1]
+            dw += self.reg*forward_weights
 
 
             #And update the gradients for the weights and biases
             grads['W'+str(layer)] = dw
-            grads['W'+str(layer)] = db
+            grads['b'+str(layer)] = db
 
             # Regularize the loss
             loss += 0.5*self.reg*np.sum(self.params['W'+str(layer)]*self.params['W'+str(layer)])
