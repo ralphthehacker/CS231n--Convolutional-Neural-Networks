@@ -110,10 +110,23 @@ class TwoLayerNet(object):
         # Finally, compute the loss and the scores
         loss, dx = softmax_loss(scores,y)
 
+
         # Backprop through the layers
+
         dlayer2,dw2,db2 = affine_backward(dout=dx, cache=layer2_cache)
+        # First layer
         dlayer1,dw1,db1 = affine_relu_backward(dout = dlayer2,cache=layer1_cache)
 
+        # # Some debugging
+        # print "Softmax's shape", dx.shape
+        # print "Second layer's cache's shape", layer2_cache[1].shape
+        # print "Second affine output = ", dlayer2.shape
+        # print "First layer's cache's shape", layer1_cache[1].shape
+        # print "First affine and ReLU output", dlayer1.shape
+        #
+
+        print ""
+        print "****"
         # Regularize the weights
         dw1 += self.reg*w1
         dw2 += self.reg*w2
@@ -327,11 +340,12 @@ class FullyConnectedNet(object):
                 drop_out,drop_cache = dropout_forward(relu_out,drop_param)
                 cache_dict['dropout'] = drop_cache
 
-                #Update the caches for this layer
-                cache_dict['affine'] = affine_cache
-                cache_dict['relu'] = relu_cache
-                # And then operate the global cache storage
-                caches[layer+1] = cache_dict
+
+            #Update the caches for this layer
+            cache_dict['affine'] = affine_cache
+            cache_dict['relu'] = relu_cache
+            # And then operate the global cache storage
+            caches[layer+1] = cache_dict
 
             #And finally, route the output to the next iteration
             if self.use_dropout:
@@ -341,10 +355,14 @@ class FullyConnectedNet(object):
                 # Else, the ReLU output should be passed forward
                 current_input = relu_out
 
+
+
         # After we process all layers, the last layer should have the scores
         final_layer_weights = self.params["W"+str(self.num_layers)]
         final_layer_bias = self.params["b"+str(self.num_layers)]
         scores,first_cache = affine_forward(current_input,final_layer_weights,final_layer_bias)
+
+
 
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -370,17 +388,21 @@ class FullyConnectedNet(object):
         ############################################################################
 
         #Calculating the loss
-        loss = softmax_scores(scores,y)
+        loss,softmax_dx= softmax_loss(scores,y)
+        # print "Softmax's dx", softmax_dx.shape
+        # print "The x's shape", first_cache[0].shape
+        # print "The weights' shape", first_cache[1].shape
 
 
         #TODO: HOW CAN I USE DB AND DW?
-        incoming_dx,incoming_dw,incoming_db = affine_backward(dout= scores,cache = first_cache)
+        incoming_dx,incoming_dw,incoming_db = affine_backward(dout= softmax_dx,cache = first_cache)
+
         # Update the grads of the last layer
-        grads[self.params["W"+str(self.num_layers)]] = incoming_dw
-        grads[self.params["W"+str(self.num_layers)]] = incoming_db
+        grads["W"+str(self.num_layers)] = self.reg*incoming_dw
+        grads["W"+str(self.num_layers)] = incoming_db
 
         # Now, do the backward pass :P
-        for layer in reversed(range(self.num_layers-1)):
+        for layer in reversed(range(1,self.num_layers)):
             relu_input = None
             # If the net uses dropout
             if self.use_dropout:
@@ -391,7 +413,21 @@ class FullyConnectedNet(object):
                 relu_input = incoming_dx
 
             # Backpropagating into the relu layer
+            # print "Testing the cache"
+            # print "layer is",layer
+            # for key in caches.keys():
+            #     print key
+
+
+            # print "Shape of the relu input", incoming_dx.shape
+            # print "Shape of the relu cache", caches[layer]["relu"].shape
+
+
+
             relu_out = relu_backward(dout=relu_input,cache = caches[layer]["relu"])
+            # print "shape of the relu output", relu_out
+            # print ""
+            # print "*********"
 
             # If the net uses batch normalization
             affine_input = None
@@ -407,6 +443,7 @@ class FullyConnectedNet(object):
 
             #Now, regularize the weights for the fully connected layer
             dw += self.reg*dw
+
 
             #And update the gradients for the weights and biases
             grads['W'+str(layer)] = dw
