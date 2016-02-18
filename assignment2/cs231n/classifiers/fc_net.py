@@ -218,13 +218,17 @@ class FullyConnectedNet(object):
             if use_batchnorm:
                 current_gamma = "gamma"+str(layer+1)
                 current_beta = "beta"+str(layer+1)
-            print "Parameters",current_weight, current_bias
+            print ""
+            if use_batchnorm:
+                print "Parameters",current_weight, current_bias,current_gamma, current_beta
+            else:
+                print "Parameters",current_weight, current_bias
 
 
             # First Layer
             if layer == 0:
-
-                print "Layer", layer," shape",(input_dim, hidden_dims[0])
+                #print "yay"
+                #print "Layer", layer," shape",(input_dim, hidden_dims[0])
                 self.params[current_weight] = np.random.normal(scale=weight_scale, size=(input_dim, hidden_dims[0]))
                 self.params[current_bias] = np.zeros(shape=hidden_dims[0])
                 if use_batchnorm:
@@ -232,14 +236,18 @@ class FullyConnectedNet(object):
                     self.params[current_beta] = np.zeros(shape=hidden_dims[0])
             # Last Layer
             elif layer == self.num_layers-1:
-                print "Layer", layer," shape",(hidden_dims[-1],num_classes)
+                #print "lay"
+                #print "Layer", layer," shape",(hidden_dims[-1],num_classes)
                 self.params[current_weight] = np.random.normal(scale=weight_scale, size=(hidden_dims[-1],num_classes))
                 self.params[current_bias] = np.zeros(shape = num_classes)
                 if use_batchnorm:
+                    #print "muh dik", current_gamma,current_beta
                     self.params[current_gamma] = np.ones(shape=num_classes)
                     self.params[current_beta] = np.zeros(shape=num_classes)
+                    #print "the params ",self.params.keys()
             # Any other layer
             else:
+                #print "meh"
                 print "Layer", layer," shape",(hidden_dims[layer-1], hidden_dims[layer])
                 self.params[current_weight]  = np.random.normal(scale=weight_scale, size=(hidden_dims[layer-1], hidden_dims[layer]))
                 self.params[current_bias] = np.zeros(shape=hidden_dims[layer])
@@ -326,9 +334,9 @@ class FullyConnectedNet(object):
                 gamma = self.params["gamma"+str(layer+1)]
                 beta = self.params["beta"+str(layer+1)]
                 #TODO: Watch out for the indexing of BN_PARAMS
-                batch_out, batch_cache =  batchnorm_forward(gamma=gamma,beta=beta,bn_param = self.bn_params[layer])
+                batch_out, batch_cache =  batchnorm_forward(x = affine_out,gamma=gamma,beta=beta,bn_param = self.bn_params[layer])
                 #Store the cache
-                cache_dict["batch"] = batch_cache
+                cache_dict["batchnorm"] = batch_cache
 
             # Now, do the forward pass for the ReLU layer
             relu_out,relu_cache = relu_forward(batch_out if self.use_batchnorm else affine_out)
@@ -396,6 +404,8 @@ class FullyConnectedNet(object):
         # Update the grads of the last layer
         grads["W"+str(self.num_layers)] = incoming_dw
         grads["b"+str(self.num_layers)] = incoming_db
+        grads["gamma"+str(self.num_layers)] = 0
+        grads["beta"+str(self.num_layers)] = 0
 
         # Now, do the backward pass :P
         for layer in reversed(range(1,self.num_layers)):
@@ -414,13 +424,18 @@ class FullyConnectedNet(object):
             # If the net uses batch normalization
             affine_input = None
             if self.use_batchnorm:
-                batch_out = batchnorm_backward(dout=relu_out, cache = caches[layer]["batchnorm"])
+                batch_out,batch_gamma, batch_beta= batchnorm_backward(dout=relu_out, cache = caches[layer]["batchnorm"])
+                #print "Layer number", 'gamma'+str(layer)
+                grads['gamma'+str(layer)] = batch_gamma
+                grads['beta'+str(layer)] = batch_beta
+                #Pipe the output
                 affine_input = batch_out
                 #TODO: FIX BATCH NORM GRADIENTS HERE
             else:
                 affine_input = relu_out
 
             #Passing through the last connected layer
+            #print affine_input.shape
             dx,dw,db = affine_backward(dout=affine_input,cache = caches[layer]['affine'])
 
             #Now, regularize the weights for the fully connected layer
@@ -431,6 +446,7 @@ class FullyConnectedNet(object):
             #And update the gradients for the weights and biases
             grads['W'+str(layer)] = dw
             grads['b'+str(layer)] = db
+
 
             # Regularize the loss
             loss += 0.5*self.reg*np.sum(self.params['W'+str(layer)]*self.params['W'+str(layer)])
@@ -445,5 +461,5 @@ class FullyConnectedNet(object):
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
-
+        #print grads.keys()
         return loss, grads

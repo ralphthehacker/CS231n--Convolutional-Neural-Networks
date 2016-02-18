@@ -245,6 +245,12 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     bn_param['running_mean'] = running_mean
     bn_param['running_var'] = running_var
 
+
+    # And store necessary variables on the cache
+    cache = [x,gamma,beta,eps,normalized_data]
+
+
+
     return out, cache
 
 
@@ -265,17 +271,39 @@ def batchnorm_backward(dout, cache):
   - dgamma: Gradient with respect to scale parameter gamma, of shape (D,)
   - dbeta: Gradient with respect to shift parameter beta, of shape (D,)
   """
+    # Initializing necessary values
+    x, gamma, beta,eps,x_hat = cache[0], cache[1], cache[2],cache[3],cache[4]
+    N,D = x.shape
+    x_mean = np.mean(x,axis=0)
+    x_var = np.var(x,axis=0)
+
+
     dx, dgamma, dbeta = None, None, None
+
     #############################################################################
     # TODO: Implement the backward pass for batch normalization. Store the      #
     # results in the dx, dgamma, and dbeta variables.                           #
     #############################################################################
-    pass
+
+    dbeta = np.sum(dout,axis=0)
+    dgamma = np.sum( np.transpose((dout.T*x_hat.T)),axis=0)
+    #I used calculus directly in here
+
+    mean = 1./N*np.sum(x, axis = 0)
+    var = 1./N*np.sum((x-mean)**2, axis = 0)
+
+    dx = (1. / N) * gamma * (var + eps)**(-1. / 2.) * (N * dout - np.sum(dout, axis=0) \
+                                                    - (x - mean) * (var + eps)**(-1.0) * np.sum(dout * (x - mean), axis=0))
+    return dx,dgamma, dbeta
+
+
+
+
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
 
-    return dx, dgamma, dbeta
+
 
 
 def batchnorm_backward_alt(dout, cache):
@@ -300,6 +328,42 @@ def batchnorm_backward_alt(dout, cache):
     # should be able to compute gradients with respect to the inputs in a       #
     # single statement; our implementation fits on a single 80-character line.  #
     #############################################################################
+    # Following page 4 of http://arxiv.org/pdf/1502.03167v3.pdf
+
+    # Initializing necessary values
+    x, gamma, beta,eps = cache[0], cache[1], cache[2],cache[3]
+    N,D = x.shape
+    x_mean = np.mean(x,axis=0)
+    x_var = np.var(x,axis=0)
+
+    # Calculating the loss for x_hat
+    d_loss_x_hat = dout*gamma
+
+    # Calculating the loss for the variance
+    d_loss_variance =  d_loss_x_hat*(x-x_mean)
+    d_loss_variance *= (-float(1)/2) * ( (x_var + eps)**(-float(3)/2) )
+
+
+    # Calculating the loss for the mean
+    d_loss_mean = d_loss_x_hat * (-float(1)/np.sqrt(x_var + eps))
+    d_loss_mean += d_loss_variance * (-float(2)*(x-x_mean))/N
+
+
+    # Finally, calculating the loss for X
+    d_loss_x = d_loss_x_hat * (-1/np.sqrt(x_var + eps))
+    d_loss_x += d_loss_variance * (-2*(x-x_mean))/N
+    d_loss_x += d_loss_mean * (1/N)
+    dx = d_loss_x
+
+
+
+    # Now, calculating the derivative for beta and gamma
+    dbeta = dout
+    dgamma = dout*gamma
+
+
+
+
     pass
     #############################################################################
     #                             END OF YOUR CODE                              #
