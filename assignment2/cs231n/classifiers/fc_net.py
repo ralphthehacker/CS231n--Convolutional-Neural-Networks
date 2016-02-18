@@ -344,7 +344,7 @@ class FullyConnectedNet(object):
             # Now, check if dropout is enabled
             if self.use_dropout:
                 # TODO: Check dropout parameter when implementing dropout
-                drop_param = self.dropout_param[layer]
+                drop_param = self.dropout_param
                 drop_out,drop_cache = dropout_forward(relu_out,drop_param)
                 cache_dict['dropout'] = drop_cache
 
@@ -404,8 +404,9 @@ class FullyConnectedNet(object):
         # Update the grads of the last layer
         grads["W"+str(self.num_layers)] = incoming_dw
         grads["b"+str(self.num_layers)] = incoming_db
-        grads["gamma"+str(self.num_layers)] = 0
-        grads["beta"+str(self.num_layers)] = 0
+        if self.use_batchnorm:
+            grads["gamma"+str(self.num_layers)] = 0
+            grads["beta"+str(self.num_layers)] = 0
 
         # Now, do the backward pass :P
         for layer in reversed(range(1,self.num_layers)):
