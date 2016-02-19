@@ -47,6 +47,12 @@ class ThreeLayerConvNet(object):
     # hidden affine layer, and keys 'W3' and 'b3' for the weights and biases   #
     # of the output affine layer.                                              #
     ############################################################################
+    self.params['W1'] = np.random.normal(scale=weight_scale, size=input_dim)
+    self.params['b1'] = np.zeros(shape=hidden_dim)
+
+    # Shape of W2 should be Hidden*numclasses
+    self.params['W2'] = np.random.normal(scale=weight_scale, size=(hidden_dim, num_classes))
+    self.params['b2'] = np.zeros(shape=num_classes)
     pass
     ############################################################################
     #                             END OF YOUR CODE                             #

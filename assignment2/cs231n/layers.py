@@ -1,5 +1,5 @@
 import numpy as np
-
+import scipy.ndimage
 
 
 def reshape_x(x):
@@ -472,12 +472,20 @@ def conv_forward_naive(x, w, b, conv_param):
     W' = 1 + (W + 2 * pad - WW) / stride
   - cache: (x, w, b, conv_param)
   """
+    stride = conv_param['stride']
+    pad = conv_param['pad']
+    N,C,H,W = x.shape
+    F,_,HH,WW = w.shape
     out = None
     #############################################################################
     # TODO: Implement the convolutional forward pass.                           #
     # Hint: you can use the function np.pad for padding.                        #
     #############################################################################
-    pass
+    x_padded = np.pad(x,mode='constant',pad_width=pad)
+    # Do the convolutions
+    out = scipy.ndimage.filters.convolve(x,w)
+
+
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
