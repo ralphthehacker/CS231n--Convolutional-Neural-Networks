@@ -1,5 +1,4 @@
 import numpy as np
-
 from cs231n.layers import *
 from cs231n.fast_layers import *
 from cs231n.layer_utils import *
@@ -47,14 +46,14 @@ class ThreeLayerConvNet(object):
         # hidden affine layer, and keys 'W3' and 'b3' for the weights and biases   #
         # of the output affine layer.                                              #
         ############################################################################
-        C,H,W = input_dim[1]
+        C,H,W = input_dim
         # Generating the dimensions of the output
         self.params['W1'] = np.random.normal(scale=weight_scale, size=(num_filters,C,filter_size,filter_size))
         self.params['b1'] = np.zeros(shape=num_filters)
 
         # Shape of W2 should be Hidden*numclasses
-        self.params['W2'] = np.random.normal(scale=weight_scale, size=(hidden_dim, num_classes))
-        self.params['b2'] = np.zeros(shape=num_classes)
+        self.params['W2'] = np.random.normal(scale=weight_scale, size=(num_filters*H*W/4, hidden_dim))
+        self.params['b2'] = np.zeros(shape=hidden_dim)
 
         # Shape of W3 should be Hidden*numclasses
         self.params['W3'] = np.random.normal(scale=weight_scale, size=(hidden_dim, num_classes))
@@ -141,6 +140,7 @@ class ThreeLayerConvNet(object):
         grads['W1'] = dw1
         grads['W2'] = dw2
         grads['W3'] = dw3
+
         grads['b1'] = db1
         grads['b2'] = db2
         grads['b3'] = db3
@@ -149,6 +149,7 @@ class ThreeLayerConvNet(object):
         loss += 0.5 * self.reg * np.sum(W1*W1)
         loss += 0.5 * self.reg * np.sum(W2*W2)
         loss += 0.5 * self.reg * np.sum(W3*W3)
+
 
 
         ############################################################################
