@@ -476,14 +476,40 @@ def conv_forward_naive(x, w, b, conv_param):
     pad = conv_param['pad']
     N,C,H,W = x.shape
     F,_,HH,WW = w.shape
-    out = None
+    h_out = 1 + (H + 2 * pad - HH) / stride
+    w_out = 1 + (W + 2 * pad - WW) / stride
+
+    # Generating the dimensions of the output
+    out = np.zeros(shape=(N,F,h_out,w_out))
     #############################################################################
     # TODO: Implement the convolutional forward pass.                           #
     # Hint: you can use the function np.pad for padding.                        #
     #############################################################################
-    x_padded = np.pad(x,mode='constant',pad_width=pad)
+    # Padding the input
+    x_padded = np.pad(x,[(0,0), (0,0), (pad,pad), (pad,pad)],mode='constant')
+    print "Pad's shape", x_padded.shape
+    print "Out's shape", out.shape
     # Do the convolutions
-    out = scipy.ndimage.filters.convolve(x,w)
+
+    # For every image, pass it through the filter and update the output
+    for image in range(N):
+        for filter in range(F):
+
+            # Then, do the convolutions in over H and W
+            for height in xrange(h_out):
+                end_point_height = height*stride
+                for width in xrange(w_out):
+                    end_point_width = width*stride
+
+                    # Make the convolution window
+                    conv_window = x_padded[image,:,end_point_height:end_point_height+HH, end_point_width:end_point_width+WW]
+
+                    # Finally, update the output with the convolution
+                    current_filter = w[filter]
+                    current_filter_bias = b[filter]
+                    # Updating here
+                    out[image,filter,height,width] = np.sum(conv_window * current_filter) + current_filter_bias
+
 
 
     #############################################################################
