@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="f692da5c-db7f-4188-b6eb-34c810b66b16" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/assignment2/ConvolutionalNetworks.ipynb" afterPath="$PROJECT_DIR$/assignment2/ConvolutionalNetworks.ipynb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/assignment2/cs231n/layers.py" afterPath="$PROJECT_DIR$/assignment2/cs231n/layers.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/assignment2/cs231n/classifiers/cnn.py" afterPath="$PROJECT_DIR$/assignment2/cs231n/classifiers/cnn.py" />
     </list>
     <ignored path="CS231n--Convolutional-Neural-Networks.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,11 +24,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="fc_net.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/assignment2/cs231n/classifiers/fc_net.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="133" column="0" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="layers.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/assignment2/cs231n/layers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="659" column="22" selection-start-line="659" selection-start-column="22" selection-end-line="659" selection-end-column="22" />
+            <state vertical-scroll-proportion="-12.777778">
+              <caret line="466" column="46" selection-start-line="462" selection-start-column="4" selection-end-line="466" selection-end-column="46" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -49,10 +61,22 @@
       <file leaf-file-name="cnn.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/assignment2/cs231n/classifiers/cnn.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.82887703">
-              <caret line="54" column="49" selection-start-line="52" selection-start-column="4" selection-end-line="54" selection-end-column="49" />
+            <state vertical-scroll-proportion="0.56149733">
+              <caret line="50" column="8" selection-start-line="50" selection-start-column="8" selection-end-line="50" selection-end-column="8" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="layer_utils.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/assignment2/cs231n/layer_utils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="53" column="36" selection-start-line="53" selection-start-column="36" selection-end-line="53" selection-end-column="36" />
+              <folding>
+                <element signature="e#0#27#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -65,18 +89,6 @@
               <caret line="117" column="0" selection-start-line="117" selection-start-column="0" selection-end-line="117" selection-end-column="0" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="layer_utils.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/assignment2/cs231n/layer_utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="41" column="58" selection-start-line="41" selection-start-column="58" selection-end-line="41" selection-end-column="58" />
-              <folding>
-                <element signature="e#0#27#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -112,8 +124,8 @@
         <option value="$PROJECT_DIR$/assignment2/cs231n/solver.py" />
         <option value="$PROJECT_DIR$/assignment2/cs231n/optim.py" />
         <option value="$PROJECT_DIR$/assignment2/cs231n/classifiers/fc_net.py" />
-        <option value="$PROJECT_DIR$/assignment2/cs231n/classifiers/cnn.py" />
         <option value="$PROJECT_DIR$/assignment2/cs231n/layers.py" />
+        <option value="$PROJECT_DIR$/assignment2/cs231n/classifiers/cnn.py" />
       </list>
     </option>
   </component>
@@ -844,32 +856,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/assignment2/cs231n/layers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="659" column="22" selection-start-line="659" selection-start-column="22" selection-end-line="659" selection-end-column="22" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/assignment2/cs231n/layer_utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="41" column="58" selection-start-line="41" selection-start-column="58" selection-end-line="41" selection-end-column="58" />
+          <caret line="53" column="36" selection-start-line="53" selection-start-column="36" selection-end-line="53" selection-end-column="36" />
           <folding>
             <element signature="e#0#27#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/assignment2/cs231n/classifiers/fc_net.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.026737968">
-          <caret line="27" column="11" selection-start-line="27" selection-start-column="11" selection-end-line="27" selection-end-column="11" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -882,10 +874,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/assignment2/cs231n/classifiers/fc_net.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="133" column="0" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/assignment2/cs231n/layers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-12.777778">
+          <caret line="466" column="46" selection-start-line="462" selection-start-column="4" selection-end-line="466" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/assignment2/cs231n/classifiers/cnn.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.82887703">
-          <caret line="54" column="49" selection-start-line="52" selection-start-column="4" selection-end-line="54" selection-end-column="49" />
+        <state vertical-scroll-proportion="0.56149733">
+          <caret line="50" column="8" selection-start-line="50" selection-start-column="8" selection-end-line="50" selection-end-column="8" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
