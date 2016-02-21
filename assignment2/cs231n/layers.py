@@ -487,8 +487,6 @@ def conv_forward_naive(x, w, b, conv_param):
     #############################################################################
     # Padding the input
     x_padded = np.pad(x,[(0,0), (0,0), (pad,pad), (pad,pad)],mode='constant')
-    print "Pad's shape", x_padded.shape
-    print "Out's shape", out.shape
     # Do the convolutions
 
     # For every image, pass it through the filter and update the output
@@ -532,11 +530,54 @@ def conv_backward_naive(dout, cache):
   - dw: Gradient with respect to w
   - db: Gradient with respect to b
   """
-    dx, dw, db = None, None, None
+    x,w,b,conv_param = cache
+
+    # Setting up
+
+    dx = np.zeros_like(x)
+    dw = np.zeros_like(w)
+    db = np.zeros_like(b)
+
+    stride = conv_param['stride']
+    pad = conv_param['pad']
+    N,C,H,W = x.shape
+    F,_,HH,WW = w.shape
+    h_out = 1 + (H + 2 * pad - HH) / stride
+    w_out = 1 + (W + 2 * pad - WW) / stride
     #############################################################################
     # TODO: Implement the convolutional backward pass.                          #
     #############################################################################
-    pass
+    # Padding x and dx
+    x_padded = np.pad(x,[(0,0), (0,0), (pad,pad), (pad,pad)],mode='constant')
+    dx_padded = np.pad(dx,[(0,0), (0,0), (pad,pad), (pad,pad)],mode='constant')
+    # Do the convolutions
+
+    # For every image, pass it through the filter and update the output
+    for image in range(N):
+        for filter in range(F):
+            # Then, do the convolutions in over H and W
+            for height in xrange(h_out):
+                end_point_height = height*stride
+                for width in xrange(w_out):
+                    end_point_width = width*stride
+
+                    # Make the convolution window
+                    conv_window = x_padded[image,:,end_point_height:end_point_height+HH, end_point_width:end_point_width+WW]
+
+                    # And update the derivatives
+                    db[filter] += dout[image,filter,height,width]
+                    dw[filter] += conv_window*dout[image,filter,height,width]
+                    #Update DX at the convolution window
+                    dx_padded[image,:,end_point_height:end_point_height+HH, end_point_width:end_point_width+WW] += w[filter] *\
+                                                dout[image,filter,height,width]
+
+                    # And remove the padding
+                    dx = dx_padded[:,:,pad:pad+H, pad:pad+W]
+
+
+
+
+
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
