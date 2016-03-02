@@ -237,6 +237,7 @@ def word_embedding_forward(x, W):
     # HINT: This should be very simple.                                          #
     ##############################################################################
     cache = (x,W)
+    # Just index the output with X, since X already contains the indices
     out  = W[x]
 
     ##############################################################################
@@ -262,13 +263,16 @@ def word_embedding_backward(dout, cache):
   """
     x,W = cache
     dW = np.zeros(shape=W.shape)
-    print dout.shape
+    # Just index dout with the valid indices of the examples to get the necessary gradients
+    print "This is dout \n \t", np.add.at(dW,x,dout)
+
     ##############################################################################
     # TODO: Implement the backward pass for word embeddings.                     #
     #                                                                            #
     # HINT: Look up the function np.add.at                                       #
     ##############################################################################
-
+    #
+    print dW.shape
 
 
   ##############################################################################
