@@ -319,7 +319,24 @@ def lstm_step_forward(x, prev_h, prev_c, Wx, Wh, b):
     # TODO: Implement the forward pass for a single timestep of an LSTM.        #
     # You may want to use the numerically stable sigmoid implementation above.  #
     #############################################################################
-    pass
+
+    # Finding the activation vector for the input
+    activation_vector = np.dot(x,Wx) + np.dot(prev_h,Wh) + b
+
+    # Separating the activations into 4 vectors
+    input,forget, output, g = np.split(activation_vector, 4,axis=1)
+
+    # Calculting the functions for every single parameter
+    input = sigmoid(input)
+    forget = sigmoid(forget)
+    output = sigmoid(output)
+    g = np.tanh(g)
+
+    # Finally, update the previous hidden and cell states
+    next_c = forget*prev_c + input*g
+    next_h = output * np.tanh(next_c)
+
+    cache = (x,prev_h,prev_c,Wx,Wh,b,input, forget, output, g, next_c)
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -345,12 +362,45 @@ def lstm_step_backward(dnext_h, dnext_c, cache):
   - db: Gradient of biases, of shape (4H,)
   """
     dx, dh, dc, dWx, dWh, db = None, None, None, None, None, None
+    dprev_h,dprev_c = None,None
+    x,prev_h,prev_c,Wx,Wh,b,input, forget, output, g, next_c = cache
+
     #############################################################################
     # TODO: Implement the backward pass for a single timestep of an LSTM.       #
     #                                                                           #
     # HINT: For sigmoid and tanh you can compute local derivatives in terms of  #
     # the output value from the nonlinearity.                                   #
     #############################################################################
+
+    # First, calculate the derivative of the hidden state
+    dh = dnext_h * (1-(output**2)) * np.tanh(next_c)
+    # Then, the derivative of the output gate
+    doutput = (1-(next_c**2))*output
+    dprev_h = dh
+
+    # Then,
+
+
+
+    # Tanh derivative
+    dhtanh = (1 - np.square(next_h)) * dnext_h
+
+    # Backpropping into the Bias
+    db = np.sum(dhtanh, axis=0)
+
+    # Backpropping into the hidden state and its weights
+    dWh = np.dot(prev_h.T, dhtanh)
+    dprev_h = np.dot(dhtanh, Wh.T)
+
+    # Backpropping into the input
+    dWx = np.dot(x.T, dhtanh)
+    dx = np.dot(dhtanh, Wx.T)
+
+    # Yay, done!
+
+
+
+
     pass
     ##############################################################################
     #                               END OF YOUR CODE                             #
