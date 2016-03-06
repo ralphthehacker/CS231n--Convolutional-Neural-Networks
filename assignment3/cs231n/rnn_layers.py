@@ -384,30 +384,30 @@ def lstm_step_backward(dnext_h, dnext_c, cache):
     tanh_cell_n = next_c_n
 
     # Calculating the derivative of the output
-    doutput_n = tanh_cell_n * dnext_h
+    doutput_n = tanh_cell_n * (dnext_h)
 
     # Then, calculate the derivative of the cell state
-    dcell = (1 - tanh_cell_n**2) * (output_n * dnext_h)
+    dcell = ((1 - tanh_cell_n**2) * (output_n * dnext_h))  + dnext_c
 
     # Calculate the derivative of the Forget gate nonlinearity
-    dforget_n = (prev_c * dcell) * dnext_c
+    dforget_n = (prev_c * dcell)
 
     # And the derivative of the previous hidden state
-    dprev_c = forget_n * dcell * dnext_c
+    dprev_c = (forget_n * dcell)
 
     # Calculating the derivative of the input gate
-    dinput_n = g_n * dcell * dnext_c
+    dinput_n = g_n * dcell
 
     # and of the G gate
-    dg_n = input_n * dcell * dnext_c
+    dg_n = input_n * dcell
 
     # Now, backpropagate through the activation functions and get the derivatives of the gates
 
-    dg = (1.-g_n**2)*g_n # G gate
+    dg = (1.-g_n**2)*dg_n # G gate
     dinput =  (input_n*(1-input_n)) * dinput_n # Input gate
     dforget = (forget_n*(1-forget_n)) * dforget_n # Forget gate
     doutput = (output_n*(1-output_n)) * doutput_n # Output gate
-    d_activations = np.hstack((dinput,dforget,doutput,dforget))#.reshape((dinput.shape[0],4*dinput.shape[1]))
+    d_activations = np.hstack((dinput,dforget,doutput,dg))#.reshape((dinput.shape[0],4*dinput.shape[1]))
 
     # Backpropagate to the original matrix multiply and weights
     db = np.sum(d_activations,axis=0) # Bias
