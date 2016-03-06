@@ -327,16 +327,17 @@ def lstm_step_forward(x, prev_h, prev_c, Wx, Wh, b):
     input,forget, output, g = np.split(activation_vector, 4,axis=1)
 
     # Calculting the functions for every single parameter
-    input = sigmoid(input)
-    forget = sigmoid(forget)
-    output = sigmoid(output)
-    g = np.tanh(g)
+    input_n = sigmoid(input)
+    forget_n = sigmoid(forget)
+    output_n = sigmoid(output)
+    g_n = np.tanh(g)
 
     # Finally, update the previous hidden and cell states
-    next_c = forget*prev_c + input*g
-    next_h = output * np.tanh(next_c)
+    next_c = forget_n*prev_c + input_n*g_n
+    next_c_n = np.tanh(next_c)
+    next_h = output_n * next_c_n
 
-    cache = (x,prev_h,prev_c,Wx,Wh,b,input, forget, output, g, next_c)
+    cache = (x,prev_h,prev_c,Wx,Wh,b,input, forget, output, g, input_n,forget_n, output_n, g_n, next_c, next_c_n, next_h)
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -361,9 +362,16 @@ def lstm_step_backward(dnext_h, dnext_c, cache):
   - dWh: Gradient of hidden-to-hidden weights, of shape (H, 4H)
   - db: Gradient of biases, of shape (4H,)
   """
-    dx, dh, dc, dWx, dWh, db = None, None, None, None, None, None
-    dprev_h,dprev_c = None,None
-    x,prev_h,prev_c,Wx,Wh,b,input, forget, output, g, next_c = cache
+    # Unpacking the cache
+    x,prev_h,prev_c,Wx,Wh,b,input, forget, output, g, input_n,forget_n, output_n, g_n, next_c, next_c_n, next_h = cache
+
+    # Initializing the derivatives
+    dx = np.zeros(shape = (x.shape))
+    dprev_h = np.zeros(shape = (prev_h.shape))
+    dprev_c = np.zeros(shape = (prev_c.shape))
+    dWx = np.zeros(shape = (Wx.shape))
+    dWh = np.zeros(shape = (Wh.shape))
+    db = np.zeros(shape = (b.shape))
 
     #############################################################################
     # TODO: Implement the backward pass for a single timestep of an LSTM.       #
@@ -372,36 +380,44 @@ def lstm_step_backward(dnext_h, dnext_c, cache):
     # the output value from the nonlinearity.                                   #
     #############################################################################
 
-    # First, calculate the derivative of the hidden state
-    dh = dnext_h * (1-(output**2)) * np.tanh(next_c)
-    # Then, the derivative of the output gate
-    doutput = (1-(next_c**2))*output
-    dprev_h = dh
+    # Setting the tanh of the cell state
+    tanh_cell_n = next_c_n
 
-    # Then,
+    # Calculating the derivative of the output
+    doutput_n = tanh_cell_n * dnext_h
+
+    # Then, calculate the derivative of the cell state
+    dcell = (1 - tanh_cell_n**2) * (output_n * dnext_h)
+
+    # Calculate the derivative of the Forget gate nonlinearity
+    dforget_n = (prev_c * dcell) * dnext_c
+
+    # And the derivative of the previous hidden state
+    dprev_c = forget_n * dcell * dnext_c
+
+    # Calculating the derivative of the input gate
+    dinput_n = g_n * dcell * dnext_c
+
+    # and of the G gate
+    dg_n = input_n * dcell * dnext_c
+
+    # Now, backpropagate through the activation functions and get the derivatives of the gates
+
+    dg = (1.-g_n**2)*g_n # G gate
+    dinput =  (input_n*(1-input_n)) * dinput_n # Input gate
+    dforget = (forget_n*(1-forget_n)) * dforget_n # Forget gate
+    doutput = (output_n*(1-output_n)) * doutput_n # Output gate
+    d_activations = np.hstack((dinput,dforget,doutput,dforget))#.reshape((dinput.shape[0],4*dinput.shape[1]))
+
+    # Backpropagate to the original matrix multiply and weights
+    db = np.sum(d_activations,axis=0) # Bias
+    dx = np.dot(d_activations, Wx.transpose())
+    dWx = np.dot(x.transpose(), d_activations)
+    dprev_h = np.dot(d_activations, Wh.transpose())
+    dWh = np.dot(prev_h.transpose(), d_activations)
 
 
 
-    # Tanh derivative
-    dhtanh = (1 - np.square(next_h)) * dnext_h
-
-    # Backpropping into the Bias
-    db = np.sum(dhtanh, axis=0)
-
-    # Backpropping into the hidden state and its weights
-    dWh = np.dot(prev_h.T, dhtanh)
-    dprev_h = np.dot(dhtanh, Wh.T)
-
-    # Backpropping into the input
-    dWx = np.dot(x.T, dhtanh)
-    dx = np.dot(dhtanh, Wx.T)
-
-    # Yay, done!
-
-
-
-
-    pass
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -565,3 +581,4 @@ def temporal_softmax_loss(x, y, mask, verbose=False):
     dx = dx_flat.reshape(N, T, V)
 
     return loss, dx
+
