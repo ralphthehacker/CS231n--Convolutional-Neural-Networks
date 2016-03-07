@@ -387,7 +387,7 @@ def lstm_step_backward(dnext_h, dnext_c, cache):
     doutput_n = tanh_cell_n * (dnext_h)
 
     # Then, calculate the derivative of the cell state
-    dcell = ((1 - tanh_cell_n**2) * (output_n * dnext_h))  + dnext_c
+    dcell = ((1 - tanh_cell_n**2) * (output_n * dnext_h)) + dnext_c
 
     # Calculate the derivative of the Forget gate nonlinearity
     dforget_n = (prev_c * dcell)
@@ -447,12 +447,37 @@ def lstm_forward(x, h0, Wx, Wh, b):
   - h: Hidden states for all timesteps of all sequences, of shape (N, T, H)
   - cache: Values needed for the backward pass.
   """
-    h, cache = None, None
+    # Getting some basic shapes
+    N,timesteps, D = x.shape[0],x.shape[1], x.shape[2]
+    H = h0.shape[1]
+    # Initializing output variables
+    h = np.zeros(shape=(N,timesteps,H))
+    cache = []
+    # Initializing necessary variables
+    current_cell = np.zeros_like(h0)
+    current_hidden = h0[:]
+
+
+
     #############################################################################
     # TODO: Implement the forward pass for an LSTM over an entire timeseries.   #
     # You should use the lstm_step_forward function that you just defined.      #
     #############################################################################
-    pass
+    for timestep in range(timesteps):
+        # Get the input and cell for the current timestep
+        current_x = x[:,timestep,:]
+
+        # Compute the forward pass
+        next_hidden, next_cell, cur_cache = lstm_step_forward(current_x,current_hidden,current_cell,Wx,Wh,b)
+        h[:,timestep,:] = next_hidden
+
+        # Store the cache and update h and the cell state
+        cache.append(cur_cache)
+        current_cell = next_cell
+        current_hidden = next_hidden
+
+
+
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -475,12 +500,43 @@ def lstm_backward(dh, cache):
   - dWh: Gradient of hidden-to-hidden weight matrix of shape (H, 4H)
   - db: Gradient of biases, of shape (4H,)
   """
-    dx, dh0, dWx, dWh, db = None, None, None, None, None
+
+    # Getting basic dimensions
+    a = (cache[0][0].shape)
+    D = a[1]
+    N, timesteps, H = dh.shape
+
+    # Initializing output variables
+    dx = np.zeros(shape=(N, timesteps, D))
+    dh0 = np.zeros(shape=(N, H))
+    dWx = np.zeros(shape=(D, 4*H))
+    dWh = np.zeros(shape=(H, 4*H))
+    db = np.zeros(shape=(4*H,))
+
+    # Initializing cell gradient variable
+    current_dcell = np.zeros_like(dh[:,0,:])
     #############################################################################
     # TODO: Implement the backward pass for an LSTM over an entire timeseries.  #
     # You should use the lstm_step_backward function that you just defined.     #
     #############################################################################
-    pass
+    for timestep in reversed(xrange(timesteps)):
+        # Getting the current cache
+        current_cache = cache[timestep]
+        # Doing a backward pass using the previous hidden state
+        current_hidden = dh[:,timestep,:]+dh0
+        cur_dx,cur_dprev_h, cur_dprev_c, cur_dWx, cur_dWh, cur_db = lstm_step_backward(current_hidden, current_dcell, current_cache)
+        # Updating the cell state
+        current_dcell = cur_dprev_c
+        # Passing the gradient to the previous timestep
+
+        # And adding the gradients up
+        dx[:,timestep,:] += cur_dx
+        dh0 = cur_dprev_h
+        dWx += cur_dWx
+        dWh += cur_dWh
+        db += cur_db
+
+
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################

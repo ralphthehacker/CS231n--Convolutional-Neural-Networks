@@ -150,6 +150,8 @@ class CaptioningRNN(object):
         #     vectors for all timesteps, producing an array of shape (N, T, H).    #
         if self.cell_type == "rnn":
             alg_output, alg_cache = rnn_forward(word_vectors, original_hidden_state,Wx, Wh, b)
+        elif self.cell_type == "lstm":
+            alg_output,alg_cache = lstm_forward(word_vectors, original_hidden_state,Wx, Wh, b)
 
 
         #  4) Use a (temporal) affine transformation to compute scores over the    #
@@ -172,6 +174,9 @@ class CaptioningRNN(object):
         # from the temporal layer to the RNN/ LSTM layer
         if self.cell_type == "rnn":
             dx_alg, dprev_h_alg, dWx_alg, dWh_alg, db_alg = rnn_backward(dx_temporal,alg_cache)
+        elif self.cell_type == "lstm":
+            dx_alg, dprev_h_alg, dWx_alg, dWh_alg, db_alg = lstm_backward(dx_temporal,alg_cache)
+
 
         # From the RNN layer to the word embedding layer
         word_dout = word_embedding_backward(dx_alg, word_vectors_cache)
@@ -237,6 +242,9 @@ class CaptioningRNN(object):
         prev_word = self._start
         cur_word_vec = captions.copy()
 
+
+
+
         ###########################################################################
         # TODO: Implement test-time sampling for the model. You will need to      #
         # initialize the hidden state of the RNN by applying the learned affine   #
@@ -259,6 +267,8 @@ class CaptioningRNN(object):
         # a loop.                                                                 #
         ###########################################################################
 
+        if self.cell_type == "lstm":
+                cur_cell = None
         for step in range(N):
             # Initialize the hidden state
             hidden_state, _ = affine_forward(features,W_proj,b_proj)
@@ -269,7 +279,14 @@ class CaptioningRNN(object):
 
 
             #Step with the rnn to get the next hidden state
-            next_hidden,_ = rnn_step_forward(word_vectors[:,step,:], hidden_state, Wx,Wh,b)
+            if self.cell_type == "rnn":
+                next_hidden,_ = rnn_step_forward(word_vectors[:,step,:], hidden_state, Wx,Wh,b)
+            elif self.cell_type == "lstm":
+                if cur_cell == None:
+                    cur_cell = np.zeros_like(hidden_state)
+                next_hidden,next_c ,_ = lstm_step_forward(word_vectors[:,step,:], hidden_state,cur_cell, Wx,Wh,b)
+                cur_cell = next_c
+
 
             # Do an affine transformation and score the vocabulary
             vocabulary,_ = affine_forward(next_hidden, W_vocab, b_vocab)
